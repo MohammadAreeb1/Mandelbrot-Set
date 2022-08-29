@@ -49,8 +49,10 @@ function mouseWheel(event) {
 }
 
 function mousePressed() {
-    prevmousepos = [mouseX / width, map(mouseY, 0, height, height, 0) / height];
-    mousedown = true;
+    if (mouseX < width && mouseY < height) {
+        prevmousepos = [mouseX / width, map(mouseY, 0, height, height, 0) / height];
+        mousedown = true;
+    }
 }
 
 function mouseReleased() {
