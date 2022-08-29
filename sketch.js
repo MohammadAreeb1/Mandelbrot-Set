@@ -1,31 +1,62 @@
 let theShader;
-let signoftime = true;
+let zoom = 1;
+let currentcenter = [0, 0];
+let prevmousepos = [0, 0];
+let currentmousepos = [0, 0];
+let mousedown = false;
+let range = 2.5;
 
 function preload() {
     theShader = loadShader("shader.vert", "mandelbrot.frag");
+    slider = createSlider(1, 1000, 1);
+    div = createDiv("Max Number of Iterations (1000)");
     pixelDensity(1);
 }
 
 function setup() {
-    createCanvas(displayHeight, displayHeight, WEBGL);
+    createCanvas(400, 400, WEBGL);
     noStroke();
 }
 
 function draw() {
+    if (mousedown) {
+        let scaledmousex = mouseX / width;
+        let scaledmousey = map(mouseY, 0, height, height, 0) / height;
+        currentmousepos = [scaledmousex, scaledmousey];
+        let dx = prevmousepos[0] - currentmousepos[0];
+        let dy = prevmousepos[1] - currentmousepos[1];
+        currentcenter[0] += dx * range;
+        currentcenter[1] += dy * range;
+        prevmousepos[0] = currentmousepos[0];
+        prevmousepos[1] = currentmousepos[1];
+    }
+    theShader.setUniform("mousepos", currentcenter);
     theShader.setUniform("u_resolution", [width, height]);
-    theShader.setUniform("u_time", getsmoothtime()); // we divide millis by 1000 to convert it to seconds
-    theShader.setUniform("u_mouse", [mouseX, map(mouseY, 0, height, height, 0)]); // we flip Y so it's oriented properly in our shader
+    theShader.setUniform("range", getrange(zoom));
+    theShader.setUniform("maxitrs", slider.value());
     shader(theShader);
     rect(0, 0, width, height);
 }
 
-function getsmoothtime() {
-    let seconds = millis() / 1000.0;
-    let frequency = (1 / 3) * seconds + 5;
-    let time = 15 * sin(frequency) + 17.5;
-    if (signoftime) {
-        print(time);
-        signoftime = false;
+function mouseWheel(event) {
+    if (event.deltaY > 0 && zoom > 1) {
+        zoom -= 1;
+    } else {
+        zoom += 1;
     }
-    return time;
+}
+
+function mousePressed() {
+    prevmousepos = [mouseX / width, map(mouseY, 0, height, height, 0) / height];
+    mousedown = true;
+}
+
+function mouseReleased() {
+    mousedown = false;
+}
+
+function getrange(zoom) {
+    zoom = zoom;
+    range = pow(2.0, -zoom * 0.5) * 8.0;
+    return range;
 }
