@@ -10,6 +10,8 @@ function preload() {
     theShader = loadShader("shader.vert", "mandelbrot.frag");
     slider = createSlider(1, 1000, 1);
     div = createDiv("Max Number of Iterations (1000)");
+    div = createDiv("Drag mouse to pan around");
+    div = createDiv("Scroll to Zoom");
     pixelDensity(1);
 }
 
